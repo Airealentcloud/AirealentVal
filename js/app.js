@@ -221,8 +221,26 @@ const App = {
 
         } catch (err) {
             console.error('Failed to create val request:', err);
-            alert('Something went wrong. Please try again!');
-        } finally {
+            console.error('Error details:', err.message, err);
+
+            // Fallback to legacy base64 mode if Supabase fails
+            console.log('Falling back to legacy link mode (no photos)');
+            const data = { s: this.senderName, v: this.valName, g: this.gender };
+            const encoded = btoa(JSON.stringify(data));
+            const baseUrl = window.location.origin + window.location.pathname;
+            const shareUrl = `${baseUrl}?d=${encoded}`;
+
+            this.goTo('screen-link');
+            this.renderPreviewPhotos('preview-photos');
+            document.getElementById('preview-text').innerHTML =
+                `<strong>${this.valName}</strong>, <strong>${this.senderName}</strong> wants to know...<br>Will You Be My Val? \u{1F495}`;
+            document.getElementById('share-url').value = shareUrl;
+            const hint = this.lang === 'pid'
+                ? `Send this link give ${this.valName} and wait for their response \u{1F440}`
+                : `Send this link to ${this.valName} and wait for their response \u{1F440}`;
+            document.getElementById('share-hint').textContent = hint + ' (Photos not saved - Supabase setup incomplete)';
+            this.spawnConfetti('confetti-burst', 30);
+
             btn.innerHTML = originalText;
             btn.disabled = false;
         }

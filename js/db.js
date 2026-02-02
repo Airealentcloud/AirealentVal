@@ -2,8 +2,18 @@
 const SUPABASE_URL = 'https://vbjznpyvhhecxxbmizpc.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZianpucHl2aGhlY3h4Ym1penBjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk5NTk2MzQsImV4cCI6MjA4NTUzNTYzNH0.gVXhfjf536X_NQgSfjh6AOa9aZ12ueN-gBrr4oZjlwQ';
 
-// Initialize Supabase client
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// Initialize Supabase client with error check
+let supabase = null;
+try {
+    if (window.supabase && window.supabase.createClient) {
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        console.log('Supabase client initialized');
+    } else {
+        console.error('Supabase SDK not loaded');
+    }
+} catch (e) {
+    console.error('Supabase initialization failed:', e);
+}
 
 const DB = {
     // Generate a short readable ID like "israel-to-babe-a3x9"
@@ -42,6 +52,7 @@ const DB = {
 
     // Create a new val request in the database
     async createRequest(data) {
+        if (!supabase) throw new Error('Supabase not initialized');
         const { error } = await supabase
             .from('val_requests')
             .insert(data);
