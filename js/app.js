@@ -4,13 +4,6 @@ const App = {
     gender: null,          // 'm2f' or 'f2m'
     senderName: '',
     valName: '',
-    senderPhoto: null,     // base64 for preview
-    valPhoto: null,        // base64 for preview
-    senderPhotoFile: null, // File object for upload
-    valPhotoFile: null,    // File object for upload
-    senderPhotoUrl: null,  // Supabase public URL
-    valPhotoUrl: null,     // Supabase public URL
-    requestId: null,       // Supabase record ID
     lang: 'en',            // 'en' or 'pid'
     soundOn: false,
     quizAnswers: [],
@@ -33,30 +26,10 @@ const App = {
     },
 
     // ===== URL PARAMS (Val View) =====
-    async checkURLParams() {
+    checkURLParams() {
         const params = new URLSearchParams(window.location.search);
 
-        // New Supabase-backed links: ?v=id
-        const valId = params.get('v');
-        if (valId) {
-            const req = await DB.getRequest(valId);
-            if (req) {
-                this.requestId = req.id;
-                this.senderName = req.sender_name || 'Someone';
-                this.valName = req.val_name || 'You';
-                this.gender = req.gender || 'm2f';
-                this.senderPhotoUrl = req.sender_photo_url || null;
-                this.valPhotoUrl = req.val_photo_url || null;
-                if (req.quiz_demand) this.quizDemand = req.quiz_demand;
-                this.isValView = true;
-                // Track that the link was opened
-                DB.markOpened(valId);
-                this.showGameScreen();
-                return;
-            }
-        }
-
-        // Legacy fallback: ?d=base64
+        // Base64 encoded links: ?d=base64
         const data = params.get('d');
         if (data) {
             try {
@@ -64,6 +37,7 @@ const App = {
                 this.senderName = decoded.s || 'Someone';
                 this.valName = decoded.v || 'You';
                 this.gender = decoded.g || 'm2f';
+                if (decoded.qd) this.quizDemand = decoded.qd;
                 this.isValView = true;
                 this.showGameScreen();
             } catch (e) {
@@ -136,28 +110,8 @@ const App = {
         this.goTo('screen-names');
     },
 
-    // ===== PHOTO HANDLING =====
-    handlePhoto(input, previewId) {
-        const file = input.files[0];
-        if (!file) return;
-        // Keep file reference for Supabase upload
-        if (input.id === 'sender-photo') this.senderPhotoFile = file;
-        else this.valPhotoFile = file;
-
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const base64 = e.target.result;
-            if (input.id === 'sender-photo') this.senderPhoto = base64;
-            else this.valPhoto = base64;
-
-            const preview = document.getElementById(previewId);
-            preview.innerHTML = `<img src="${base64}" alt="Photo">`;
-        };
-        reader.readAsDataURL(file);
-    },
-
     // ===== CREATE VAL REQUEST =====
-    async createValRequest() {
+    createValRequest() {
         this.senderName = document.getElementById('sender-name').value.trim();
         this.valName = document.getElementById('val-name').value.trim();
 
@@ -166,84 +120,32 @@ const App = {
             return;
         }
 
-        // Show loading state on button
-        const btn = document.querySelector('#screen-names .btn-primary');
-        const originalText = btn.innerHTML;
-        btn.innerHTML = 'Creating... \u{1F495}';
-        btn.disabled = true;
-
-        try {
-            // Generate ID
-            const id = DB.generateId(this.senderName, this.valName);
-            this.requestId = id;
-
-            // Upload photos in parallel if they exist
-            const [senderPhotoUrl, valPhotoUrl] = await Promise.all([
-                DB.uploadPhoto(this.senderPhotoFile, id, 'sender'),
-                DB.uploadPhoto(this.valPhotoFile, id, 'val')
-            ]);
-
-            this.senderPhotoUrl = senderPhotoUrl;
-            this.valPhotoUrl = valPhotoUrl;
-
-            // Save to Supabase
-            await DB.createRequest({
-                id: id,
-                sender_name: this.senderName,
-                val_name: this.valName,
-                gender: this.gender,
-                sender_photo_url: senderPhotoUrl,
-                val_photo_url: valPhotoUrl,
-                quiz_demand: this.quizDemand || null
-            });
-
-            // Generate shareable link
-            const baseUrl = window.location.origin + window.location.pathname;
-            const shareUrl = `${baseUrl}?v=${id}`;
-
-            // Show link screen
-            this.goTo('screen-link');
-
-            // Preview card
-            this.renderPreviewPhotos('preview-photos');
-            document.getElementById('preview-text').innerHTML =
-                `<strong>${this.valName}</strong>, <strong>${this.senderName}</strong> wants to know...<br>Will You Be My Val? \u{1F495}`;
-
-            document.getElementById('share-url').value = shareUrl;
-
-            const hint = this.lang === 'pid'
-                ? `Send this link give ${this.valName} and wait for their response \u{1F440}`
-                : `Send this link to ${this.valName} and wait for their response \u{1F440}`;
-            document.getElementById('share-hint').textContent = hint;
-
-            // Confetti
-            this.spawnConfetti('confetti-burst', 30);
-
-        } catch (err) {
-            console.error('Failed to create val request:', err);
-            console.error('Error details:', err.message, err);
-
-            // Fallback to legacy base64 mode if Supabase fails
-            console.log('Falling back to legacy link mode (no photos)');
-            const data = { s: this.senderName, v: this.valName, g: this.gender };
-            const encoded = btoa(JSON.stringify(data));
-            const baseUrl = window.location.origin + window.location.pathname;
-            const shareUrl = `${baseUrl}?d=${encoded}`;
-
-            this.goTo('screen-link');
-            this.renderPreviewPhotos('preview-photos');
-            document.getElementById('preview-text').innerHTML =
-                `<strong>${this.valName}</strong>, <strong>${this.senderName}</strong> wants to know...<br>Will You Be My Val? \u{1F495}`;
-            document.getElementById('share-url').value = shareUrl;
-            const hint = this.lang === 'pid'
-                ? `Send this link give ${this.valName} and wait for their response \u{1F440}`
-                : `Send this link to ${this.valName} and wait for their response \u{1F440}`;
-            document.getElementById('share-hint').textContent = hint + ' (Photos not saved - Supabase setup incomplete)';
-            this.spawnConfetti('confetti-burst', 30);
-
-            btn.innerHTML = originalText;
-            btn.disabled = false;
+        // Create simple shareable link (no photos, no database)
+        const data = { s: this.senderName, v: this.valName, g: this.gender };
+        if (this.quizDemand) {
+            data.qd = this.quizDemand;
         }
+        const encoded = btoa(JSON.stringify(data));
+        const baseUrl = window.location.origin + window.location.pathname;
+        const shareUrl = `${baseUrl}?d=${encoded}`;
+
+        // Show link screen
+        this.goTo('screen-link');
+
+        // Preview card
+        this.renderPreviewPhotos('preview-photos');
+        document.getElementById('preview-text').innerHTML =
+            `<strong>${this.valName}</strong>, <strong>${this.senderName}</strong> wants to know...<br>Will You Be My Val? \u{1F495}`;
+
+        document.getElementById('share-url').value = shareUrl;
+
+        const hint = this.lang === 'pid'
+            ? `Copy and send am! \u{1F4E4}`
+            : `Copy and send it! \u{1F4E4}`;
+        document.getElementById('share-hint').textContent = hint;
+
+        // Confetti
+        this.spawnConfetti('confetti-burst', 30);
     },
 
     // ===== SHARING =====
@@ -517,11 +419,6 @@ const App = {
         document.body.style.width = '';
         document.body.style.height = '';
 
-        // Track response in Supabase
-        if (this.requestId) {
-            DB.markResponded(this.requestId, this.chaseCount);
-        }
-
         this.playSound('yes');
         this.goTo('screen-result');
         this.renderResult();
@@ -588,39 +485,23 @@ const App = {
     // ===== PHOTO RENDERING HELPERS =====
     renderPreviewPhotos(containerId) {
         const el = document.getElementById(containerId);
-        const senderHtml = this.senderPhoto
-            ? `<div class="photo-circle"><img src="${this.senderPhoto}" alt="${this.senderName}"></div>`
-            : `<div class="photo-circle">${this.gender === 'm2f' ? '\u{1F468}' : '\u{1F469}'}</div>`;
-        const valHtml = this.valPhoto
-            ? `<div class="photo-circle"><img src="${this.valPhoto}" alt="${this.valName}"></div>`
-            : `<div class="photo-circle">${this.gender === 'm2f' ? '\u{1F469}' : '\u{1F468}'}</div>`;
-        el.innerHTML = `${senderHtml}<span class="heart-between">\u{1F495}</span>${valHtml}`;
+        const senderEmoji = this.gender === 'm2f' ? '\u{1F468}' : '\u{1F469}';
+        const valEmoji = this.gender === 'm2f' ? '\u{1F469}' : '\u{1F468}';
+        el.innerHTML = `<div class="photo-circle">${senderEmoji}</div><span class="heart-between">\u{1F495}</span><div class="photo-circle">${valEmoji}</div>`;
     },
 
     renderGamePhotos(containerId) {
         const el = document.getElementById(containerId);
         const senderEmoji = this.gender === 'm2f' ? '\u{1F468}' : '\u{1F469}';
         const valEmoji = this.gender === 'm2f' ? '\u{1F469}' : '\u{1F468}';
-        const senderHtml = this.senderPhotoUrl
-            ? `<div class="photo-circle"><img src="${this.senderPhotoUrl}" alt="${this.senderName}"></div>`
-            : `<div class="photo-circle">${senderEmoji}</div>`;
-        const valHtml = this.valPhotoUrl
-            ? `<div class="photo-circle"><img src="${this.valPhotoUrl}" alt="${this.valName}"></div>`
-            : `<div class="photo-circle">${valEmoji}</div>`;
-        el.innerHTML = `${senderHtml}<span class="heart-between">\u{1F495}</span>${valHtml}`;
+        el.innerHTML = `<div class="photo-circle">${senderEmoji}</div><span class="heart-between">\u{1F495}</span><div class="photo-circle">${valEmoji}</div>`;
     },
 
     renderResultPhotos(containerId) {
         const el = document.getElementById(containerId);
         const senderEmoji = this.gender === 'm2f' ? '\u{1F468}' : '\u{1F469}';
         const valEmoji = this.gender === 'm2f' ? '\u{1F469}' : '\u{1F468}';
-        const senderHtml = this.senderPhotoUrl
-            ? `<div class="photo-circle"><img src="${this.senderPhotoUrl}" alt="${this.senderName}"></div>`
-            : `<div class="photo-circle">${senderEmoji}</div>`;
-        const valHtml = this.valPhotoUrl
-            ? `<div class="photo-circle"><img src="${this.valPhotoUrl}" alt="${this.valName}"></div>`
-            : `<div class="photo-circle">${valEmoji}</div>`;
-        el.innerHTML = `${senderHtml}<span class="heart-between">\u{1F495}</span>${valHtml}`;
+        el.innerHTML = `<div class="photo-circle">${senderEmoji}</div><span class="heart-between">\u{1F495}</span><div class="photo-circle">${valEmoji}</div>`;
     },
 
     // ===== FLOATING HEARTS =====
@@ -661,32 +542,13 @@ const App = {
     },
 
     // ===== STATS ANIMATION =====
-    async animateStats() {
-        // Base numbers to make it look active from day one
-        const base = { men: 147, women: 203, yes: 312, noFail: 248 };
+    animateStats() {
+        // Fun numbers to make it look popular
+        const stats = { men: 2847, women: 3124, yes: 5692, noFail: 4201 };
 
-        try {
-            const real = await DB.getStats();
-            if (real) {
-                base.men += real.men;
-                base.women += real.women;
-                base.yes += real.yes;
-                base.noFail += real.noFail;
-            }
-        } catch (e) {
-            // Supabase unavailable, use base numbers
-        }
-
-        const map = {
-            'stat-men': base.men,
-            'stat-women': base.women,
-            'stat-yes': base.yes,
-            'stat-no-fail': base.noFail
-        };
-
-        Object.keys(map).forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.textContent = map[id].toLocaleString();
+        Object.keys(stats).forEach(key => {
+            const el = document.getElementById(`stat-${key}`);
+            if (el) el.textContent = stats[key].toLocaleString();
         });
     },
 

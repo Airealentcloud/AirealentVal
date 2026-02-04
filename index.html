@@ -109,24 +109,6 @@
                     <label data-en="What's your Val's name?" data-pid="Wetin be your Val name?">What's your Val's name?</label>
                     <input type="text" id="val-name" placeholder="Your Val's name" maxlength="30" class="input-field">
                 </div>
-                <div class="form-group photo-upload">
-                    <label data-en="Your photo (optional)" data-pid="Your photo (optional)">Your photo (optional)</label>
-                    <div class="upload-area" onclick="document.getElementById('sender-photo').click()">
-                        <input type="file" id="sender-photo" accept="image/*" onchange="App.handlePhoto(this, 'sender-preview')">
-                        <div id="sender-preview" class="photo-preview">
-                            <span>&#128247; Tap to upload</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="form-group photo-upload">
-                    <label data-en="Your Val's photo (optional)" data-pid="Your Val photo (optional)">Your Val's photo (optional)</label>
-                    <div class="upload-area" onclick="document.getElementById('val-photo').click()">
-                        <input type="file" id="val-photo" accept="image/*" onchange="App.handlePhoto(this, 'val-preview')">
-                        <div id="val-preview" class="photo-preview">
-                            <span>&#128247; Tap to upload</span>
-                        </div>
-                    </div>
-                </div>
                 <button class="btn btn-primary btn-glow" onclick="App.createValRequest()">
                     <span data-en="Create My Val Request" data-pid="Create My Val Request">Create My Val Request</span> &#128149;
                 </button>
