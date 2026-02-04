@@ -266,13 +266,14 @@ const Content = {
                 ]
             },
             {
-                question: "Where do you want to live in Abuja?",
+                question: "Where do you want to live?",
                 options: [
-                    "Maitama (I have standards)",
-                    "Asokoro (I know my worth)",
-                    "Gwarinpa (I'm realistic)",
-                    "Anywhere with good light and water \u{1F602}",
-                    "I just need roof and love"
+                    "Banana Island, Lagos (I have BIG standards)",
+                    "Ikoyi, Lagos (I know my worth)",
+                    "Maitama, Abuja (Premium vibes)",
+                    "Asokoro, Abuja (Solid choice)",
+                    "Gwarinpa, Abuja (I'm realistic)",
+                    "Anywhere with good light and water \u{1F602}"
                 ]
             },
             {
@@ -306,13 +307,14 @@ const Content = {
                 ]
             },
             {
-                question: "Where you wan live for Abuja?",
+                question: "Where you wan live?",
                 options: [
-                    "Maitama (I get standard)",
-                    "Asokoro (I know my worth)",
-                    "Gwarinpa (I dey realistic)",
-                    "Anywhere wey light and water dey \u{1F602}",
-                    "I just need roof and love"
+                    "Banana Island, Lagos (I get BIG standard)",
+                    "Ikoyi, Lagos (I know my worth)",
+                    "Maitama, Abuja (Premium vibes)",
+                    "Asokoro, Abuja (Solid choice)",
+                    "Gwarinpa, Abuja (I dey realistic)",
+                    "Anywhere wey light and water dey \u{1F602}"
                 ]
             },
             {
@@ -332,25 +334,39 @@ const Content = {
         // answers is array of indices [q1, q2, q3, q4]
         const duration = answers[0]; // 0-4
         const gifts = answers[1];    // 0-3
-        const location = answers[2]; // 0-4
+        const location = answers[2]; // 0-5 (now includes Lagos)
         const serious = answers[3];  // 0-3
 
-        // High-end demand
-        if (duration >= 3 && gifts <= 1 && location <= 1) {
+        // ULTRA HIGH-END: Banana Island
+        if (location === 0) {
+            return {
+                demand: "Banana Island??? Your Val better be SERIOUS! \u{1F92F}\u{1F4B0}",
+                property: "Waterfront mansion in Banana Island, Lagos"
+            };
+        }
+        // HIGH-END: Ikoyi
+        if (location === 1 && duration >= 2) {
+            return {
+                demand: "Ikoyi living! Your Val knows you're worth it \u{1F451}",
+                property: "Luxury apartment in Ikoyi, Lagos"
+            };
+        }
+        // Premium Abuja: Maitama
+        if (duration >= 3 && gifts <= 1 && location === 2) {
             return {
                 demand: "Your Val OWES you a mansion in Maitama! No excuses! \u{1F624}",
-                property: "Duplex in Maitama with swimming pool"
+                property: "Duplex in Maitama, Abuja with swimming pool"
             };
         }
         // Just met, realistic
-        if (duration === 0 && location >= 3) {
+        if (duration === 0 && location >= 4) {
             return {
                 demand: "Start small \u2014 1 plot in Lugbe. Love will grow with the land \u{1F602}",
                 property: "1 plot of land in Lugbe"
             };
         }
-        // Generous partner, mid area
-        if (gifts >= 2 && location === 2) {
+        // Generous partner, Gwarinpa
+        if (gifts >= 2 && location === 4) {
             return {
                 demand: "Your Val is ready! Time for that duplex in Gwarinpa \u{1F3E0}",
                 property: "Semi-detached duplex in Gwarinpa"
