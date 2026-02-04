@@ -246,8 +246,16 @@ input[type="file"] { display: none; }
 .game-intro { color: #c4a0d0; font-size: 18px; margin-bottom: 10px; }
 .game-question {
     font-family: 'Dancing Script', cursive; font-size: 38px;
-    color: #ff6b9d; margin-bottom: 40px;
+    color: #ff6b9d; margin-bottom: 15px;
     text-shadow: 0 0 30px rgba(255,107,157,0.4);
+}
+.game-demand {
+    color: #ffd700; font-size: 20px; font-weight: 600;
+    margin-bottom: 8px; line-height: 1.4;
+}
+.game-hint {
+    color: rgba(255,255,255,0.5); font-size: 13px;
+    font-style: italic; margin-bottom: 30px;
 }
 
 .game-buttons { display: flex; align-items: center; gap: 40px; position: relative; justify-content: center; }
@@ -408,6 +416,8 @@ input[type="file"] { display: none; }
     .main-title { font-size: 28px; }
     .hero-heart { font-size: 60px; }
     .game-question { font-size: 26px; }
+    .game-demand { font-size: 17px; }
+    .game-hint { font-size: 11px; }
 }
 
 /* Mobile landscape - keep game compact */

@@ -322,6 +322,22 @@ const App = {
         // Photos
         this.renderGamePhotos('game-photos');
 
+        // Set question and demand based on gender
+        const property = this.gender === 'm2f' ? 'House' : 'Land';
+        const propertyEmoji = this.gender === 'm2f' ? '🏠' : '🏞️';
+        document.getElementById('game-question').innerHTML =
+            this.lang === 'en'
+                ? `Will You Be My Val? ${propertyEmoji}`
+                : `You Go Be My Val? ${propertyEmoji}`;
+        document.getElementById('game-demand').innerHTML =
+            this.lang === 'en'
+                ? `Buy me a ${property} first! 💕`
+                : `Buy me ${property} first! 💕`;
+        document.getElementById('game-hint').innerHTML =
+            this.lang === 'en'
+                ? `(Psst... the "No" button won't work 😏)`
+                : `(Ehen... the "No" button no go work 😏)`;
+
         // Reset chase
         this.chaseCount = 0;
         document.getElementById('chase-message').textContent = '';
@@ -689,6 +705,24 @@ const App = {
             const text = el.getAttribute(`data-${this.lang}`);
             if (text) el.textContent = text;
         });
+
+        // Update game screen dynamic text if it's active
+        if (this.isValView && document.getElementById('screen-game').classList.contains('active')) {
+            const property = this.gender === 'm2f' ? 'House' : 'Land';
+            const propertyEmoji = this.gender === 'm2f' ? '🏠' : '🏞️';
+            document.getElementById('game-question').innerHTML =
+                this.lang === 'en'
+                    ? `Will You Be My Val? ${propertyEmoji}`
+                    : `You Go Be My Val? ${propertyEmoji}`;
+            document.getElementById('game-demand').innerHTML =
+                this.lang === 'en'
+                    ? `Buy me a ${property} first! 💕`
+                    : `Buy me ${property} first! 💕`;
+            document.getElementById('game-hint').innerHTML =
+                this.lang === 'en'
+                    ? `(Psst... the "No" button won't work 😏)`
+                    : `(Ehen... the "No" button no go work 😏)`;
+        }
     },
 
     // ===== SOUND =====
