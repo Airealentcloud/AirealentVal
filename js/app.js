@@ -29,11 +29,12 @@ const App = {
     checkURLParams() {
         const params = new URLSearchParams(window.location.search);
 
-        // Base64 encoded links: ?d=base64
+        // Encoded links: ?d=encodedJSON
         const data = params.get('d');
         if (data) {
             try {
-                const decoded = JSON.parse(atob(data));
+                // URLSearchParams already decodes percent-encoding
+                const decoded = JSON.parse(data);
                 this.senderName = decoded.s || 'Someone';
                 this.valName = decoded.v || 'You';
                 this.gender = decoded.g || 'm2f';
@@ -41,7 +42,7 @@ const App = {
                 this.isValView = true;
                 this.showGameScreen();
             } catch (e) {
-                console.log('Invalid link data');
+                console.error('Invalid link data:', e);
             }
         }
     },
@@ -120,12 +121,18 @@ const App = {
             return;
         }
 
-        // Create simple shareable link (no photos, no database)
+        if (!this.gender) {
+            alert('Please go back and select who is asking first!');
+            return;
+        }
+
+        // Create shareable link using URL-safe encoding
         const data = { s: this.senderName, v: this.valName, g: this.gender };
         if (this.quizDemand) {
             data.qd = this.quizDemand;
         }
-        const encoded = btoa(JSON.stringify(data));
+
+        const encoded = encodeURIComponent(JSON.stringify(data));
         const baseUrl = window.location.origin + window.location.pathname;
         const shareUrl = `${baseUrl}?d=${encoded}`;
 
@@ -544,7 +551,7 @@ const App = {
     // ===== STATS ANIMATION =====
     animateStats() {
         // Fun numbers to make it look popular
-        const stats = { men: 2847, women: 3124, yes: 5692, noFail: 4201 };
+        const stats = { men: 2847, women: 3124, yes: 5692, 'no-fail': 4201 };
 
         Object.keys(stats).forEach(key => {
             const el = document.getElementById(`stat-${key}`);
