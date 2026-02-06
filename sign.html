@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Do You Want To Be a Val? | A.I Realent Global Resources</title>
+    <meta name="description" content="Do you want to be a Val? But first... you must buy from A.I Realent! Try clicking No... we dare you!">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Do You Want To Be a Val?">
+    <meta property="og:description" content="Try clicking No... we dare you! If you want to be a Val, you must buy from A.I Realent!">
+    <meta property="og:type" content="website">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Playfair+Display:wght@700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Sign page specific styles */
+        .sign-screen {
+            position: relative;
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .sign-content {
+            max-width: 500px;
+            width: 100%;
+            z-index: 2;
+        }
+
+        .sign-hero {
+            font-size: 80px;
+            margin-bottom: 10px;
+            animation: heartbeat 1.5s ease infinite;
+        }
+
+        .sign-title {
+            font-family: 'Dancing Script', cursive;
+            font-size: 42px;
+            color: #ffd700;
+            margin-bottom: 12px;
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
+        }
+
+        .sign-demand {
+            color: #ff6b9d;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .sign-brand {
+            color: #ffd700;
+            font-weight: 700;
+        }
+
+        .sign-hint {
+            color: rgba(255,255,255,0.5);
+            font-size: 13px;
+            font-style: italic;
+            margin-bottom: 30px;
+        }
+
+        .sign-buttons {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            margin-top: 20px;
+            min-height: 80px;
+        }
+
+        .sign-chase-message {
+            color: #ff6b9d;
+            font-size: 16px;
+            font-weight: 600;
+            min-height: 24px;
+            margin-top: 20px;
+        }
+
+        .sign-chase-counter {
+            color: rgba(255,255,255,0.5);
+            font-size: 13px;
+            min-height: 20px;
+            margin-top: 5px;
+        }
+
+        .sign-footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sign-footer p {
+            color: rgba(255,255,255,0.4);
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .sign-footer a {
+            color: #ffd700;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .sign-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .sign-redirect-msg {
+            color: #ffd700;
+            font-size: 18px;
+            font-weight: 600;
+            margin-top: 20px;
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            .sign-title { font-size: 34px; }
+            .sign-hero { font-size: 60px; }
+            .sign-demand { font-size: 17px; }
+        }
+
+        @media (max-width: 380px) {
+            .sign-title { font-size: 28px; }
+            .sign-hero { font-size: 50px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Hearts Background -->
+    <div id="hearts-bg" class="hearts-bg"></div>
+
+    <!-- Top Controls -->
+    <div class="top-controls">
+        <button id="lang-toggle" class="control-btn">
+            <span>Pidgin</span>
+        </button>
+        <button id="sound-toggle" class="control-btn">
+            <span class="sound-on" style="display:none">&#128266;</span>
+            <span class="sound-off">&#128264;</span>
+        </button>
+    </div>
+
+    <!-- Sign Page Content -->
+    <div class="sign-screen">
+        <div class="sign-content">
+            <div class="sign-hero">&#10084;&#65039;</div>
+
+            <h1 class="sign-title" id="sign-title" data-en="Do You Want To Be a Val?" data-pid="You Wan Be Val?">Do You Want To Be a Val?</h1>
+
+            <p class="sign-demand" id="sign-demand" data-en="If I should be your Val, you must buy from" data-pid="If I go be your Val, you must buy from">If I should be your Val, you must buy from</p>
+            <p class="sign-demand"><span class="sign-brand">A.I Realent Global Resources!</span> &#127968;</p>
+
+            <p class="sign-hint" id="sign-hint" data-en="(Psst... the &quot;No&quot; button won't work &#128527;)" data-pid="(Ehen... the &quot;No&quot; button no go work &#128527;)">(Psst... the "No" button won't work &#128527;)</p>
+
+            <div class="sign-buttons">
+                <button id="btn-yes" class="btn btn-yes" onclick="SignApp.clickYes()">
+                    <span data-en="Yes, I Do!" data-pid="Yes, I Do!">Yes, I Do!</span> &#10084;&#65039;
+                </button>
+                <button id="btn-no" class="btn btn-no">
+                    <span data-en="No" data-pid="No">No</span> &#128528;
+                </button>
+            </div>
+
+            <div id="chase-message" class="sign-chase-message"></div>
+            <div id="chase-counter" class="sign-chase-counter"></div>
+
+            <p id="redirect-msg" class="sign-redirect-msg">Taking you to A.I Realent... &#127968;</p>
+
+            <div class="sign-footer">
+                <p>Powered by</p>
+                <a href="https://airealent.ng" target="_blank">A.I Realent Global Resources Ltd</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/sign.js"></script>
+</body>
+</html>
